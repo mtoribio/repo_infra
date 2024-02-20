@@ -13,7 +13,7 @@ exports.handler = async function (event) {
 				Name: image.name,
 			},
 		},
-		FeatureTypes: ['TABLES' || 'FORMS' || 'QUERIES' || 'SIGNATURES' || 'LAYOUT'],
+		FeatureTypes: ['TABLES', 'FORMS', 'QUERIES', 'SIGNATURES', 'LAYOUT'],
 	};
 
 	try {
