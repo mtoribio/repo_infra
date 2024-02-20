@@ -10,6 +10,7 @@ import { CertificateStack } from '../lib/certificate-stack';
 import { SandBoxStack } from '../lib/sandbox-stack';
 import { BucketStack } from '../lib/bucket-stack';
 import { EmailStack } from '../lib/email-stack';
+import { ApiTextract } from '../lib/apitextract-stack';
 import { dev as env } from './environments';
 
 const app = new cdk.App();
@@ -58,6 +59,7 @@ const sandboxStack = new SandBoxStack(app, createName('stack', 'sandbox'), {
 	bastionHostSG: networkStack.bastionHostSG,
 });
 const emailStack = new EmailStack(app, createName('stack', 'email'), { env });
+const apiTextract = new ApiTextract(app, createName('stack', 'api'), { env });
 
 cdk.Tags.of(networkStack).add('proyecto', project);
 cdk.Tags.of(databaseStack).add('proyecto', project);
@@ -69,3 +71,4 @@ cdk.Tags.of(acmUsEast2Stack).add('proyecto', project);
 cdk.Tags.of(bucketStack).add('proyecto', project);
 cdk.Tags.of(emailStack).add('proyecto', project);
 cdk.Tags.of(sandboxStack).add('proyecto', project);
+cdk.Tags.of(apiTextract).add('proyecto', project);
