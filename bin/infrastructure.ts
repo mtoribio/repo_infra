@@ -20,6 +20,7 @@ const { project } = env;
 const networkStack = new NetworkStack(app, createName('stack', 'network'), {
 	env,
 });
+const repositoryStack = new RepositoryStack(app, createName('stack', 'repository'), { env });
 const databaseStack = new DataBaseStack(app, createName('stack', 'database'), {
 	env,
 	vpc: networkStack.vpc,
@@ -27,7 +28,6 @@ const databaseStack = new DataBaseStack(app, createName('stack', 'database'), {
 	redisSG: networkStack.elasticCacheSG,
 	subnetGroup: networkStack.subnetGroup,
 });
-const repositoryStack = new RepositoryStack(app, createName('stack', 'repository'), { env });
 const acmUsEast1Stack = new CertificateStack(app, 'hrmgo-us-east-1-stack-dev-acm', {
 	env: { ...env, region: 'us-east-1' },
 	crossRegionReferences: true,
