@@ -1,0 +1,7 @@
+RulesToSuppress:
+  - id: F4
+    reason: Nuestro caso de uso necesita todos los permisos para el uso de Textract y S3.
+  - id: F11
+    reason: Nuestro caso de uso necesita aplicar permisos directamente al usuario.
+  - id: F2000
+    reason: Nuestro caso de uso no necesita añadir el usuario a un grupo.
