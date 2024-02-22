@@ -29,6 +29,11 @@ const databaseStack = new DataBaseStack(app, createName('stack', 'database'), {
 	subnetGroup: networkStack.subnetGroup,
 });
 const emailStack = new EmailStack(app, createName('stack', 'email'), { env });
+const sandboxStack = new SandBoxStack(app, createName('stack', 'sandbox'), {
+	env,
+	vpc: networkStack.vpc,
+	bastionHostSG: networkStack.bastionHostSG,
+});
 const acmUsEast1Stack = new CertificateStack(app, 'hrmgo-us-east-1-stack-dev-acm', {
 	env: { ...env, region: 'us-east-1' },
 	crossRegionReferences: true,
@@ -53,11 +58,6 @@ const distributionStack = new DistributionStack(app, createName('stack', 'distri
 });
 const bucketStack = new BucketStack(app, createName('stack', 'bucket'), {
 	env,
-});
-const sandboxStack = new SandBoxStack(app, createName('stack', 'sandbox'), {
-	env,
-	vpc: networkStack.vpc,
-	bastionHostSG: networkStack.bastionHostSG,
 });
 const apiTextract = new ApiTextract(app, createName('stack', 'api'), { env });
 
