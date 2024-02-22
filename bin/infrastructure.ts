@@ -28,6 +28,7 @@ const databaseStack = new DataBaseStack(app, createName('stack', 'database'), {
 	redisSG: networkStack.elasticCacheSG,
 	subnetGroup: networkStack.subnetGroup,
 });
+const emailStack = new EmailStack(app, createName('stack', 'email'), { env });
 const acmUsEast1Stack = new CertificateStack(app, 'hrmgo-us-east-1-stack-dev-acm', {
 	env: { ...env, region: 'us-east-1' },
 	crossRegionReferences: true,
@@ -58,17 +59,16 @@ const sandboxStack = new SandBoxStack(app, createName('stack', 'sandbox'), {
 	vpc: networkStack.vpc,
 	bastionHostSG: networkStack.bastionHostSG,
 });
-const emailStack = new EmailStack(app, createName('stack', 'email'), { env });
 const apiTextract = new ApiTextract(app, createName('stack', 'api'), { env });
 
 cdk.Tags.of(networkStack).add('proyecto', project);
-cdk.Tags.of(databaseStack).add('proyecto', project);
 cdk.Tags.of(repositoryStack).add('proyecto', project);
+cdk.Tags.of(databaseStack).add('proyecto', project);
+cdk.Tags.of(emailStack).add('proyecto', project);
 cdk.Tags.of(containerStack).add('proyecto', project);
 cdk.Tags.of(distributionStack).add('proyecto', project);
 cdk.Tags.of(acmUsEast1Stack).add('proyecto', project);
 cdk.Tags.of(acmUsEast2Stack).add('proyecto', project);
 cdk.Tags.of(bucketStack).add('proyecto', project);
-cdk.Tags.of(emailStack).add('proyecto', project);
 cdk.Tags.of(sandboxStack).add('proyecto', project);
 cdk.Tags.of(apiTextract).add('proyecto', project);
