@@ -7,7 +7,7 @@ import * as iam from 'aws-cdk-lib/aws-iam';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 
-export interface ApiTextractProps extends StackProps {
+export interface TextractApiProps extends StackProps {
 	env: {
 		region: string;
 		project: string;
@@ -15,8 +15,8 @@ export interface ApiTextractProps extends StackProps {
 	};
 }
 
-export class ApiTextract extends Stack {
-	constructor(scope: Construct, id: string, props: ApiTextractProps) {
+export class TextractApi extends Stack {
+	constructor(scope: Construct, id: string, props: TextractApiProps) {
 		super(scope, id, props);
 
 		// CREAR BUCKET DE S3 PARA TEXTRACT

@@ -10,7 +10,7 @@ import { CertificateStack } from '../lib/certificate-stack';
 import { SandBoxStack } from '../lib/sandbox-stack';
 import { BucketStack } from '../lib/bucket-stack';
 import { EmailStack } from '../lib/email-stack';
-import { ApiTextract } from '../lib/apitextract-stack';
+import { TextractApi } from '../lib/textractapi-stack';
 import { dev as env } from './environments';
 
 const app = new cdk.App();
@@ -27,12 +27,6 @@ const databaseStack = new DataBaseStack(app, createName('stack', 'database'), {
 	dbSG: networkStack.dbSG,
 	redisSG: networkStack.elasticCacheSG,
 	subnetGroup: networkStack.subnetGroup,
-});
-const emailStack = new EmailStack(app, createName('stack', 'email'), { env });
-const sandboxStack = new SandBoxStack(app, createName('stack', 'sandbox'), {
-	env,
-	vpc: networkStack.vpc,
-	bastionHostSG: networkStack.bastionHostSG,
 });
 const acmUsEast1Stack = new CertificateStack(app, 'hrmgo-us-east-1-stack-dev-acm', {
 	env: { ...env, region: 'us-east-1' },
@@ -56,10 +50,16 @@ const distributionStack = new DistributionStack(app, createName('stack', 'distri
 	hrmgoCertificate: acmUsEast1Stack.hrmgoCertificate,
 	crossRegionReferences: true,
 });
+const emailStack = new EmailStack(app, createName('stack', 'email'), { env });
+const sandboxStack = new SandBoxStack(app, createName('stack', 'sandbox'), {
+	env,
+	vpc: networkStack.vpc,
+	bastionHostSG: networkStack.bastionHostSG,
+});
 const bucketStack = new BucketStack(app, createName('stack', 'bucket'), {
 	env,
 });
-const apiTextract = new ApiTextract(app, createName('stack', 'api'), { env });
+const textractApi = new TextractApi(app, createName('stack', 'textract-api'), { env });
 
 cdk.Tags.of(networkStack).add('proyecto', project);
 cdk.Tags.of(repositoryStack).add('proyecto', project);
@@ -71,4 +71,4 @@ cdk.Tags.of(acmUsEast1Stack).add('proyecto', project);
 cdk.Tags.of(acmUsEast2Stack).add('proyecto', project);
 cdk.Tags.of(bucketStack).add('proyecto', project);
 cdk.Tags.of(sandboxStack).add('proyecto', project);
-cdk.Tags.of(apiTextract).add('proyecto', project);
+cdk.Tags.of(textractApi).add('proyecto', project);
