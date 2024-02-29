@@ -1,7 +1,7 @@
 import { Duration, RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as apigw from 'aws-cdk-lib/aws-apigateway';
-import { createName } from '../utils/createName';
+import { createName } from '../bin/infrastructure';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
@@ -21,7 +21,7 @@ export class TextractApi extends Stack {
 
 		// CREAR BUCKET DE S3 PARA TEXTRACT
 		const bucket = new s3.Bucket(this, 'BucketToTextract', {
-			bucketName: createName('s3', 'textract'),
+			bucketName: createName('s3', 'textract-api'),
 			blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
 			accessControl: s3.BucketAccessControl.PRIVATE,
 			encryption: s3.BucketEncryption.S3_MANAGED,
@@ -135,7 +135,9 @@ export class TextractApi extends Stack {
 			},
 		});
 
-		const apikey = api.addApiKey('APIKey', { apiKeyName: createName('apigw', 'api-key') });
+		const apikey = api.addApiKey('APIKey', {
+			apiKeyName: createName('apigw', 'api-key'),
+		});
 
 		const plan = api.addUsagePlan('UsagePlan', {
 			name: createName('apigw', 'usage-plan'),
