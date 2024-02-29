@@ -1,45 +1,74 @@
-const { TextractClient, AnalyzeExpenseCommand } = require('@aws-sdk/client-textract');
-const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
+const {
+    TextractClient,
+    AnalyzeExpenseCommand,
+} = require("@aws-sdk/client-textract");
+const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
 
 exports.handler = async function (event) {
-	const REGION = process.env.REGION;
+    const REGION = process.env.REGION;
 
-	const { image } = JSON.parse(event.body);
+    const { image } = JSON.parse(event.body);
 
-	const input = {
-		Document: {
-			S3Object: {
-				Bucket: process.env.BUCKET_NAME,
-				Name: image.name,
-			},
-		},
-	};
+    // Obtener el archivo de la solicitud
+    const fileData = Buffer.from(image.file, "base64");
 
-	try {
-		const client = new TextractClient({ region: REGION });
-		const commandTextract = new AnalyzeExpenseCommand(input);
-		const responseTextract = await client.send(commandTextract);
+    const input = {
+        Document: {
+            Bytes: fileData,
+        },
+    };
 
-		const resultsFolder = 'analyze-expense/';
-		const resultObjectKey = resultsFolder + image.name + '-result.json';
-		const s3Client = new S3Client({ region: REGION });
-		const putObjectParams = {
-			Bucket: process.env.BUCKET_NAME,
-			Key: resultObjectKey,
-			Body: JSON.stringify(responseTextract),
-		};
-		const commandS3 = new PutObjectCommand(putObjectParams);
-		await s3Client.send(commandS3);
+    try {
+        const textractClient = new TextractClient({ region: REGION });
+        const textractCommand = new AnalyzeExpenseCommand(input);
+        const textractResponse = await textractClient.send(textractCommand);
 
-		return {
-			statusCode: 200,
-			body: JSON.stringify(responseTextract),
-			headers: {
-				'Access-Control-Allow-Origin': '*',
-			},
-		};
-	} catch (error) {
-		console.error('Error:', error);
-		throw error;
-	}
+        const s3Client = new S3Client({ region: REGION });
+
+        const resultsFolder = "analyze-expense/results/";
+        const resultObjectKey =
+            resultsFolder + image.name.split(".")[0] + "-result.json";
+
+        // Configurar los parámetros para subir el json de resultados a S3
+        const textractResponseParams = {
+            Bucket: process.env.BUCKET_NAME,
+            Key: resultObjectKey,
+            Body: JSON.stringify(textractResponse),
+        };
+
+        const s3CommandResponse = new PutObjectCommand(textractResponseParams);
+        await s3Client.send(s3CommandResponse);
+
+        const imagesFolder = "analyze-expense/images/";
+        const extension = image.name.split(".")[0] ?? "jpeg";
+        const contentType =
+            extension !== "pdf"
+                ? `image/${extension}`
+                : `application/${extension}`;
+        const imageObjectKey = imagesFolder + image.name;
+
+        // Configurar los parámetros para subir la imagen a S3
+        const imageParams = {
+            Bucket: process.env.BUCKET_NAME,
+            Key: imageObjectKey,
+            Body: fileData,
+            ContentType: contentType,
+        };
+
+        const s3CommandImage = new PutObjectCommand(imageParams);
+        await s3Client.send(s3CommandImage);
+
+        return {
+            statusCode: 200,
+            body: JSON.stringify(textractResponse),
+            headers: {
+                "Access-Control-Allow-Origin": "*",
+            },
+        };
+    } catch (error) {
+        return {
+            statusCode: 500,
+            body: JSON.stringify({ error: error.message }),
+        };
+    }
 };
