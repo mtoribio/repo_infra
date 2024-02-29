@@ -1,0 +1,9 @@
+{
+    "network": "network",
+    "repository": "repository",
+    "database": "database",
+    "email": "email",
+    "sandbox": "sandbox",
+    "textract-api": "textract-api",
+    "bucket": "bucket"
+}
