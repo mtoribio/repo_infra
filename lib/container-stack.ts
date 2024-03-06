@@ -1,4 +1,4 @@
-import { RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib';
+import { Duration, RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { createName } from '../bin/infrastructure';
 import * as iam from 'aws-cdk-lib/aws-iam';
@@ -141,6 +141,7 @@ export class ContainerStack extends Stack {
 					weight: 1,
 				},
 			],
+			healthCheckGracePeriod: Duration.seconds(60),
 			enableExecuteCommand: true,
 		});
 
@@ -160,6 +161,7 @@ export class ContainerStack extends Stack {
 			targets: [service],
 			healthCheck: {
 				enabled: true,
+				interval: Duration.seconds(60),
 				path: '/login',
 			},
 		});
