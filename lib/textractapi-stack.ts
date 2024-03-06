@@ -1,7 +1,7 @@
 import { Duration, RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as apigw from 'aws-cdk-lib/aws-apigateway';
-import { createName } from '../bin/infrastructure';
+import { createName } from '../bin/cdk-code';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
@@ -19,6 +19,17 @@ export class TextractApi extends Stack {
 	constructor(scope: Construct, id: string, props: TextractApiProps) {
 		super(scope, id, props);
 
+		// CREAR BUCKET DE S3 PARA LOS LOGS
+		const s3LogsBucket = new s3.Bucket(this, 'S3LogsTextract', {
+			bucketName: createName('s3', 'logs-textract-api'),
+			enforceSSL: true,
+			accessControl: s3.BucketAccessControl.PRIVATE,
+			removalPolicy: RemovalPolicy.DESTROY,
+			autoDeleteObjects: true,
+			blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+			encryption: s3.BucketEncryption.S3_MANAGED,
+		});
+
 		// CREAR BUCKET DE S3 PARA TEXTRACT
 		const bucket = new s3.Bucket(this, 'BucketToTextract', {
 			bucketName: createName('s3', 'textract-api'),
@@ -29,6 +40,8 @@ export class TextractApi extends Stack {
 			autoDeleteObjects: true,
 			enforceSSL: true,
 			versioned: true,
+			serverAccessLogsBucket: s3LogsBucket,
+			serverAccessLogsPrefix: 'logs/',
 		});
 
 		// POLÍTICA PARA USAR TEXTRACT
@@ -133,6 +146,7 @@ export class TextractApi extends Stack {
 				metricsEnabled: true,
 				stageName: 'api',
 			},
+			binaryMediaTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/tiff', 'application/pdf'],
 		});
 
 		const apikey = api.addApiKey('APIKey', {
@@ -155,6 +169,7 @@ export class TextractApi extends Stack {
 		plan.addApiKey(apikey);
 
 		api.root.addMethod('GET', new apigw.LambdaIntegration(indexFunction), {
+			apiKeyRequired: true,
 			methodResponses: [
 				{
 					statusCode: '200',
