@@ -9,6 +9,17 @@ export class BucketStack extends Stack {
 	constructor(scope: Construct, id: string, props: StackProps) {
 		super(scope, id, props);
 
+		// Crear bucket S3 para los logs
+		const s3LogsBucket = new s3.Bucket(this, 'S3LogsBucket', {
+			bucketName: createName('s3', 'logs-statics'),
+			enforceSSL: true,
+			accessControl: s3.BucketAccessControl.PRIVATE,
+			removalPolicy: RemovalPolicy.DESTROY,
+			autoDeleteObjects: true,
+			blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+			encryption: s3.BucketEncryption.S3_MANAGED,
+		});
+
 		// Crear el bucket S3
 		const s3Bucket = new s3.Bucket(this, 'S3Bucket', {
 			bucketName: createName('s3', 'statics'),
@@ -16,8 +27,17 @@ export class BucketStack extends Stack {
 			accessControl: s3.BucketAccessControl.PRIVATE,
 			removalPolicy: RemovalPolicy.DESTROY,
 			autoDeleteObjects: true,
-			blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+			blockPublicAccess: new s3.BlockPublicAccess({
+				blockPublicAcls: true,
+				blockPublicPolicy: false,
+				ignorePublicAcls: true,
+				restrictPublicBuckets: true,
+			}),
 			encryption: s3.BucketEncryption.S3_MANAGED,
+			publicReadAccess: true,
+			serverAccessLogsBucket: s3LogsBucket,
+			serverAccessLogsPrefix: 'logs/',
+			objectOwnership: s3.ObjectOwnership.OBJECT_WRITER,
 		});
 
 		// Crear el usuario IAM
@@ -27,9 +47,9 @@ export class BucketStack extends Stack {
 
 		user.addToPolicy(
 			new iam.PolicyStatement({
-				actions: ['s3:ListAllMyBuckets'],
+				actions: ['s3:ListBucket'],
 				effect: iam.Effect.ALLOW,
-				resources: ['*'],
+				resources: [s3Bucket.bucketArn],
 			})
 		);
 
